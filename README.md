@@ -1,6 +1,18 @@
 # Auto Refresh & Click
 
-一个 Chrome 浏览器扩展，按设定的时间间隔自动刷新页面，并监控页面中链接上的文字。当发现匹配感兴趣关键词的链接时，自动在新标签页中打开该链接，并可选择将其加入收藏夹。
+<p align="center">
+  <img src="icons/icon128.png" alt="Auto Refresh & Click" width="128">
+</p>
+
+<p align="center">
+  一个 Chrome 浏览器扩展，按设定的时间间隔自动刷新页面，并监控页面中链接上的文字。<br>
+  当发现匹配感兴趣关键词的链接时，自动在新标签页中打开该链接，并可选择将其加入收藏夹。
+</p>
+
+<p align="center">
+  <a href="https://github.com/piggyy/Auto-Refresh-Chrome-And-Click/blob/main/LICENSE"><img src="https://img.shields.io/github/license/piggyy/Auto-Refresh-Chrome-And-Click" alt="License"></a>
+  <a href="https://github.com/piggyy/Auto-Refresh-Chrome-And-Click"><img src="https://img.shields.io/badge/Manifest-V3-blue" alt="Manifest V3"></a>
+</p>
 
 ## ✨ 功能特性
 
@@ -11,6 +23,7 @@
 - **🚫 防重复打开** — 已打开过的链接不会再次打开，可通过清除缓存按钮重置
 - **📋 匹配日志** — 实时记录所有匹配和点击事件
 - **🎨 主题跟随** — 自动适配浏览器亮色/暗色主题
+- **🔗 GitHub 快捷入口** — 弹出面板右上角直达项目仓库
 
 ### 匹配模式（类似 VS Code 查找）
 
@@ -39,9 +52,9 @@ Auto-Refresh-Chrome-And-Click/
 ├── background/
 │   └── background.js          # Service Worker - 定时器、收藏夹和已访问链接管理
 ├── content/
-│   └── content.js             # 内容脚本 - 页面扫描、链接打开和停止监控
+│   └── content.js             # 内容脚本 - 页面扫描、链接匹配和停止监控
 ├── popup/
-│   ├── popup.html             # 弹出窗口界面
+│   ├── popup.html             # 弹出窗口界面（含 GitHub 图标链接）
 │   ├── popup.css              # 弹出窗口样式（支持亮色/暗色主题）
 │   └── popup.js               # 弹出窗口逻辑
 ├── icons/
@@ -55,6 +68,9 @@ Auto-Refresh-Chrome-And-Click/
 ## 🚀 安装方法
 
 1. 下载或克隆本仓库
+   ```bash
+   git clone https://github.com/piggyy/Auto-Refresh-Chrome-And-Click.git
+   ```
 2. 打开 Chrome 浏览器，进入 `chrome://extensions/`
 3. 开启右上角的 **开发者模式**
 4. 点击 **加载已解压的扩展程序**
@@ -83,7 +99,8 @@ Auto-Refresh-Chrome-And-Click/
 - 收藏夹文件夹创建在「书签栏」下
 - 已有相同 URL 的书签不会重复添加
 - 在页面空白处点击或按 ESC 键可快速停止监控
+- 扩展重载后旧页面的 content script 会自动静默失效，不会产生报错
 
 ## 📄 许可证
 
-本项目基于 MIT 许可证开源。
+本项目基于 [MIT](LICENSE) 许可证开源。
