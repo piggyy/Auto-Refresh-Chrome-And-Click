@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Refresh & Click</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🔄 Auto Refresh & Click</h1>
+
+    <!-- 状态区域 -->
+    <div class="status-bar" id="statusBar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">已停止</span>
+    </div>
+
+    <!-- 刷新间隔设置 -->
+    <div class="section">
+      <label class="section-title">⏱ 刷新间隔</label>
+      <div class="inline-group">
+        <input type="number" id="intervalValue" min="1" value="30" class="input-number">
+        <select id="intervalUnit" class="input-select">
+          <option value="seconds">秒</option>
+          <option value="minutes" selected>分钟</option>
+          <option value="hours">小时</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 感兴趣的文字 -->
+    <div class="section">
+      <label class="section-title">🔍 感兴趣的文字（每行一个）</label>
+      <textarea id="keywords" rows="5" placeholder="输入要监控的链接文字&#10;每行一个关键词&#10;支持通配符 * 和 ?&#10;如: 限时*优惠&#10;    新品??上市"></textarea>
+    </div>
+
+    <!-- 匹配选项 -->
+    <div class="section">
+      <label class="section-title">⚙ 匹配选项</label>
+      <div class="match-options">
+        <label class="checkbox-label" title="区分大小写匹配 (Aa)">
+          <input type="checkbox" id="caseSensitive">
+          <span class="option-icon">Aa</span>
+          <span>区分大小写</span>
+        </label>
+        <label class="checkbox-label" title="全字匹配 (ab)">
+          <input type="checkbox" id="wholeWord">
+          <span class="option-icon">[ab]</span>
+          <span>全字匹配</span>
+        </label>
+        <label class="checkbox-label" title="使用正则表达式 (.*)">
+          <input type="checkbox" id="useRegex">
+          <span class="option-icon">.*</span>
+          <span>正则表达式</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 收藏夹选项 -->
+    <div class="section">
+      <label class="checkbox-label bookmark-option">
+        <input type="checkbox" id="addToBookmarks">
+        <span>📑 点击后加入收藏夹</span>
+      </label>
+      <div class="hint">收藏夹文件夹名为匹配到的关键词</div>
+    </div>
+
+    <!-- 点击行为 -->
+    <div class="section">
+      <label class="section-title">🖱 点击行为</label>
+      <div class="match-options">
+        <label class="radio-label">
+          <input type="radio" name="clickBehavior" value="first" checked>
+          <span>仅点击第一个匹配</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="clickBehavior" value="all">
+          <span>点击所有匹配</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 匹配日志 -->
+    <div class="section">
+      <label class="section-title">📋 匹配日志</label>
+      <div id="matchLog" class="match-log">
+        <div class="log-empty">暂无匹配记录</div>
+      </div>
+      <div class="log-actions">
+        <button id="clearLog" class="btn btn-small btn-secondary">清除日志</button>
+      </div>
+    </div>
+
+    <!-- 缓存管理 -->
+    <div class="section">
+      <label class="section-title">🗂 已访问链接缓存</label>
+      <div class="cache-info">
+        <span>已记录 <strong id="visitedCount">0</strong> 个链接</span>
+      </div>
+      <div class="hint">已打开过的链接不会重复打开，清除缓存后可重新触发</div>
+      <button id="clearCacheBtn" class="btn btn-small btn-warning">🗑 清除缓存</button>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="actions">
+      <button id="startBtn" class="btn btn-primary">▶ 开始监控</button>
+      <button id="stopBtn" class="btn btn-danger" disabled>⏹ 停止监控</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
