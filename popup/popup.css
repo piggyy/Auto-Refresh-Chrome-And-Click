@@ -79,12 +79,41 @@ body {
   padding: 16px;
 }
 
+.title-bar {
+  position: relative;
+  margin-bottom: 12px;
+}
+
 h1 {
   font-size: 18px;
   font-weight: 600;
   color: var(--accent);
-  margin-bottom: 12px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.title-icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+}
+
+.github-link {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.github-link:hover {
+  color: var(--text-primary);
 }
 
 /* ===== 状态栏 ===== */

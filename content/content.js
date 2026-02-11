@@ -159,13 +159,18 @@
    * 停止监控的辅助函数
    */
   function stopMonitoring() {
-    chrome.storage.local.get({ isRunning: false }, (config) => {
-      if (config.isRunning) {
-        chrome.storage.local.set({ isRunning: false });
-        chrome.runtime.sendMessage({ action: 'stop' });
-        console.log('[Auto Refresh & Click] 用户操作停止监控');
-      }
-    });
+    try {
+      chrome.storage.local.get({ isRunning: false }, (config) => {
+        if (chrome.runtime.lastError) return;
+        if (config.isRunning) {
+          chrome.storage.local.set({ isRunning: false });
+          chrome.runtime.sendMessage({ action: 'stop' });
+          console.log('[Auto Refresh & Click] 用户操作停止监控');
+        }
+      });
+    } catch (e) {
+      // 扩展上下文已失效，忽略
+    }
   }
 
   /**
@@ -190,21 +195,26 @@
   });
 
   // 页面加载完成后，检查是否需要立即扫描
-  chrome.storage.local.get({
-    isRunning: false,
-    keywords: '',
-    caseSensitive: false,
-    wholeWord: false,
-    useRegex: false,
-    addToBookmarks: false,
-    clickBehavior: 'first',
-  }, (config) => {
-    if (config.isRunning && config.keywords.trim()) {
-      // 延迟 1 秒扫描，确保页面完全加载
-      setTimeout(async () => {
-        console.log('[Auto Refresh & Click] 页面加载完成，开始扫描...');
-        await scanAndClick(config);
-      }, 1000);
-    }
-  });
+  try {
+    chrome.storage.local.get({
+      isRunning: false,
+      keywords: '',
+      caseSensitive: false,
+      wholeWord: false,
+      useRegex: false,
+      addToBookmarks: false,
+      clickBehavior: 'first',
+    }, (config) => {
+      if (chrome.runtime.lastError) return;
+      if (config.isRunning && config.keywords.trim()) {
+        // 延迟 1 秒扫描，确保页面完全加载
+        setTimeout(async () => {
+          console.log('[Auto Refresh & Click] 页面加载完成，开始扫描...');
+          await scanAndClick(config);
+        }, 1000);
+      }
+    });
+  } catch (e) {
+    // 扩展上下文已失效，忽略
+  }
 })();
