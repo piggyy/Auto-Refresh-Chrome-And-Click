@@ -76,23 +76,24 @@ body {
 }
 
 .container {
-  padding: 16px;
+  padding: 10px 14px;
 }
 
 .title-bar {
-  position: relative;
-  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 h1 {
   font-size: 18px;
   font-weight: 600;
   color: var(--accent);
-  text-align: center;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .title-icon {
@@ -101,11 +102,30 @@ h1 {
   vertical-align: middle;
 }
 
+.title-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.lang-select {
+  font-size: 11px;
+  padding: 2px 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  max-width: 90px;
+}
+
+.lang-select:hover {
+  border-color: var(--accent);
+}
+
 .github-link {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
   color: var(--text-muted);
   transition: color 0.2s;
   display: flex;
@@ -121,10 +141,10 @@ h1 {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: var(--bg-card);
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   border: 1px solid var(--border-color);
 }
 
@@ -167,17 +187,43 @@ h1 {
 .section {
   background: var(--bg-card);
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
   border: 1px solid var(--border-color);
 }
 
 .section-title {
   display: block;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
+}
+
+.section-title-inline {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+  margin-bottom: 6px;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.actions-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sub-row {
+  margin-top: 4px;
 }
 
 /* ===== 输入组件 ===== */
@@ -188,11 +234,11 @@ h1 {
 }
 
 .input-number {
-  width: 80px;
-  padding: 6px 10px;
+  width: 70px;
+  padding: 4px 8px;
   border: 1px solid var(--border-input);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px;
   text-align: center;
   outline: none;
   transition: border-color 0.2s;
@@ -205,10 +251,10 @@ h1 {
 }
 
 .input-select {
-  padding: 6px 10px;
+  padding: 4px 8px;
   border: 1px solid var(--border-input);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px;
   outline: none;
   background: var(--bg-input);
   color: var(--text-primary);
@@ -222,15 +268,15 @@ h1 {
 
 textarea {
   width: 100%;
-  padding: 8px 10px;
+  padding: 6px 8px;
   border: 1px solid var(--border-input);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-family: 'Consolas', 'Monaco', monospace;
   resize: vertical;
   outline: none;
   transition: border-color 0.2s;
-  line-height: 1.5;
+  line-height: 1.4;
   background: var(--bg-input);
   color: var(--text-primary);
 }
@@ -254,10 +300,25 @@ textarea::placeholder {
 .checkbox-label, .radio-label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 2px 0;
   user-select: none;
+  font-size: 12px;
+}
+
+.checkbox-label.compact, .radio-label.compact {
+  padding: 0;
+  gap: 2px;
+}
+
+.nowrap {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.match-icons {
+  gap: 4px;
 }
 
 .checkbox-label:hover, .radio-label:hover {
@@ -284,18 +345,23 @@ textarea::placeholder {
 .hint {
   font-size: 11px;
   color: var(--text-hint);
-  margin-top: 4px;
-  padding-left: 22px;
+  margin-top: 0;
+  padding-left: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ===== 匹配日志 ===== */
 .match-log {
-  max-height: 120px;
+  max-height: 80px;
   overflow-y: auto;
   border: 1px solid var(--border-log);
   border-radius: 6px;
-  padding: 6px;
-  margin-bottom: 6px;
+  padding: 4px;
+  margin-top: 4px;
   background: var(--bg-log);
   font-size: 12px;
 }
@@ -303,7 +369,8 @@ textarea::placeholder {
 .log-empty {
   text-align: center;
   color: var(--text-empty);
-  padding: 8px;
+  padding: 4px;
+  font-size: 11px;
 }
 
 .log-item {
@@ -379,6 +446,14 @@ textarea::placeholder {
   font-weight: 500;
 }
 
+.btn-tiny {
+  flex: none;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
 .btn-secondary {
   background: var(--bg-btn-secondary);
   color: var(--text-muted);
@@ -392,7 +467,6 @@ textarea::placeholder {
 .btn-warning {
   background: #f59e0b;
   color: #fff;
-  margin-top: 8px;
 }
 
 .btn-warning:hover:not(:disabled) {

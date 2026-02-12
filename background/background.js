@@ -5,6 +5,7 @@
 
 // ===== 定时器管理 =====
 const ALARM_NAME = 'auto-refresh-alarm';
+const KEEPALIVE_ALARM = 'auto-refresh-keepalive';
 
 /**
  * 将配置的间隔转换为毫秒
@@ -14,7 +15,7 @@ function getIntervalMs(value, unit) {
   switch (unit) {
     case 'seconds': return v * 1000;
     case 'minutes': return v * 60 * 1000;
-    case 'hours':   return v * 60 * 60 * 1000;
+    case 'hours':   return v * 60 * 1000 * 60;
     default:        return 30 * 60 * 1000;
   }
 }
@@ -28,12 +29,12 @@ async function startMonitoring() {
     intervalUnit: 'minutes',
   });
 
-  // Chrome alarms 最小间隔为 0.5 分钟，对于秒级用 setTimeout
   const intervalMs = getIntervalMs(config.intervalValue, config.intervalUnit);
   const intervalMinutes = intervalMs / 60000;
 
   // 清除旧的定时器
   await chrome.alarms.clear(ALARM_NAME);
+  await chrome.alarms.clear(KEEPALIVE_ALARM);
 
   if (intervalMinutes >= 0.5) {
     // 使用 Chrome Alarms API（>= 30秒）
@@ -43,9 +44,15 @@ async function startMonitoring() {
     });
     console.log(`[Background] 定时器已启动，间隔: ${intervalMinutes} 分钟`);
   } else {
-    // 对于小于 30 秒的间隔，使用 setTimeout 链
-    scheduleShortInterval(intervalMs);
-    console.log(`[Background] 短间隔定时器已启动，间隔: ${intervalMs} 毫秒`);
+    // 对于小于 30 秒的间隔，使用 keepalive alarm 保活
+    // Chrome 最小 alarm 间隔为 0.5 分钟，用它作为保活机制
+    // 实际刻新间隔存储在 storage 中，通过 keepalive 触发
+    await chrome.storage.local.set({ shortIntervalMs: intervalMs, lastRefreshTime: Date.now() });
+    await chrome.alarms.create(KEEPALIVE_ALARM, {
+      delayInMinutes: 0.5,
+      periodInMinutes: 0.5,
+    });
+    console.log(`[Background] 短间隔定时器已启动，间隔: ${intervalMs} 毫秒（keepalive 30秒）`);
   }
 
   // 立即执行第一次刷新扫描
@@ -53,34 +60,12 @@ async function startMonitoring() {
 }
 
 /**
- * 短间隔定时器（< 30秒）
- */
-let shortIntervalTimer = null;
-
-function scheduleShortInterval(intervalMs) {
-  clearShortInterval();
-  shortIntervalTimer = setTimeout(async () => {
-    const config = await chrome.storage.local.get({ isRunning: false });
-    if (config.isRunning) {
-      await refreshAndScan();
-      scheduleShortInterval(intervalMs);
-    }
-  }, intervalMs);
-}
-
-function clearShortInterval() {
-  if (shortIntervalTimer) {
-    clearTimeout(shortIntervalTimer);
-    shortIntervalTimer = null;
-  }
-}
-
-/**
  * 停止监控
  */
 async function stopMonitoring() {
   await chrome.alarms.clear(ALARM_NAME);
-  clearShortInterval();
+  await chrome.alarms.clear(KEEPALIVE_ALARM);
+  await chrome.storage.local.remove(['shortIntervalMs', 'lastRefreshTime']);
   console.log('[Background] 监控已停止');
 }
 
@@ -322,10 +307,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // ===== Alarm 事件 =====
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  const config = await chrome.storage.local.get({ isRunning: false });
+  if (!config.isRunning) {
+    // 监控已停止，清除残留 alarm
+    await chrome.alarms.clear(alarm.name);
+    return;
+  }
+
   if (alarm.name === ALARM_NAME) {
     console.log('[Background] 定时器触发刷新');
-    refreshAndScan();
+    await refreshAndScan();
+  } else if (alarm.name === KEEPALIVE_ALARM) {
+    // 短间隔模式：检查是否到达刷新时间
+    const { shortIntervalMs = 30000, lastRefreshTime = 0 } = await chrome.storage.local.get({
+      shortIntervalMs: 30000,
+      lastRefreshTime: 0,
+    });
+    const elapsed = Date.now() - lastRefreshTime;
+    if (elapsed >= shortIntervalMs) {
+      console.log(`[Background] keepalive 触发刷新（已过 ${elapsed}ms）`);
+      await chrome.storage.local.set({ lastRefreshTime: Date.now() });
+      await refreshAndScan();
+    }
   }
 });
 
@@ -333,7 +337,6 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log('[Background] 插件已安装');
-  // 初始化默认配置
   chrome.storage.local.get({ isRunning: false }, (config) => {
     if (!config.isRunning) {
       chrome.storage.local.set({ isRunning: false });
@@ -341,10 +344,24 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-// Service Worker 启动时恢复状态
-chrome.storage.local.get({ isRunning: false }, (config) => {
-  if (config.isRunning) {
-    console.log('[Background] 恢复监控状态');
-    startMonitoring();
+// ===== Service Worker 启动时恢复状态 =====
+// 每次 Service Worker 被唤醒时都会执行顶层代码
+// 检查是否有正在运行的监控任务，如果有则确保 alarm 存在
+(async () => {
+  try {
+    const config = await chrome.storage.local.get({ isRunning: false });
+    if (config.isRunning) {
+      // 检查 alarm 是否存在
+      const existingAlarm = await chrome.alarms.get(ALARM_NAME);
+      const existingKeepalive = await chrome.alarms.get(KEEPALIVE_ALARM);
+      if (!existingAlarm && !existingKeepalive) {
+        console.log('[Background] Service Worker 重启，恢复监控定时器');
+        await startMonitoring();
+      } else {
+        console.log('[Background] Service Worker 重启，定时器已存在，无需重建');
+      }
+    }
+  } catch (e) {
+    console.error('[Background] 恢复状态失败:', e);
   }
-});
+})();

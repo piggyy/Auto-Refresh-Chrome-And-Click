@@ -4,6 +4,56 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // ===== 国际化初始化 =====
+  const langSelect = document.getElementById('langSelect');
+
+  // 填充语言选择器
+  I18N.supportedLocales.forEach(loc => {
+    const opt = document.createElement('option');
+    opt.value = loc.code;
+    opt.textContent = loc.name;
+    langSelect.appendChild(opt);
+  });
+
+  // 加载保存的语言 或 自动检测
+  const { uiLanguage } = await chrome.storage.local.get({ uiLanguage: '' });
+  I18N.currentLocale = uiLanguage || I18N.detectLanguage();
+  langSelect.value = I18N.currentLocale;
+
+  // 语言切换事件
+  langSelect.addEventListener('change', async () => {
+    I18N.currentLocale = langSelect.value;
+    await chrome.storage.local.set({ uiLanguage: langSelect.value });
+    applyI18n();
+    updateStatus(elements.startBtn.disabled); // 刷新状态文本
+  });
+
+  /**
+   * 应用国际化文本到所有带 data-i18n 属性的元素
+   */
+  function applyI18n() {
+    // data-i18n: 设置 textContent
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = I18N.t(el.getAttribute('data-i18n'));
+    });
+    // data-i18n-placeholder: 设置 placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      el.placeholder = I18N.t(el.getAttribute('data-i18n-placeholder'));
+    });
+    // data-i18n-title: 设置 title
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = I18N.t(el.getAttribute('data-i18n-title'));
+    });
+    // data-i18n-template="cacheCount": 特殊处理缓存计数
+    document.querySelectorAll('[data-i18n-template="cacheCount"]').forEach(el => {
+      const count = elements.visitedCount.textContent;
+      const tpl = I18N.t('cacheCount');
+      el.innerHTML = tpl[0] + `<strong id="visitedCount">${count}</strong>` + tpl[1];
+      // 重新绑定引用
+      elements.visitedCount = document.getElementById('visitedCount');
+    });
+  }
+
   // ===== DOM 元素 =====
   const elements = {
     intervalValue: document.getElementById('intervalValue'),
@@ -60,13 +110,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderLog(config.matchLog);
   updateVisitedCount();
 
+  // 应用国际化
+  applyI18n();
+
   // ===== 事件绑定 =====
 
   // 开始监控
   elements.startBtn.addEventListener('click', async () => {
     const keywords = elements.keywords.value.trim();
     if (!keywords) {
-      showToast('请输入至少一个关键词');
+      showToast(I18N.t('toastNoKeyword'));
       elements.keywords.focus();
       return;
     }
@@ -78,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
           new RegExp(line.trim());
         } catch (e) {
-          showToast(`正则表达式无效: ${line.trim()}\n${e.message}`);
+          showToast(`${I18N.t('toastRegexInvalid')}${line.trim()}\n${e.message}`);
           return;
         }
       }
@@ -109,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.clearCacheBtn.addEventListener('click', async () => {
     chrome.runtime.sendMessage({ action: 'clearCache' }, () => {
       updateVisitedCount();
-      showToast('已清除访问缓存，链接可重新触发');
+      showToast(I18N.t('toastCacheCleared'));
     });
   });
 
@@ -173,7 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updateStatus(isRunning) {
     elements.statusDot.classList.toggle('active', isRunning);
-    elements.statusText.textContent = isRunning ? '监控中...' : '已停止';
+    elements.statusText.textContent = isRunning ? I18N.t('statusRunning') : I18N.t('statusStopped');
     elements.statusText.style.color = isRunning
       ? 'var(--success)'
       : 'var(--text-muted)';
@@ -183,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderLog(logs) {
     if (!logs || logs.length === 0) {
-      elements.matchLog.innerHTML = '<div class="log-empty">暂无匹配记录</div>';
+      elements.matchLog.innerHTML = `<div class="log-empty">${I18N.t('logEmpty')}</div>`;
       return;
     }
 

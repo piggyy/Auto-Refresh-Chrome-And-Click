@@ -129,10 +129,13 @@
     });
 
     // 根据配置决定打开链接和/或加入收藏夹
-    matchResults.forEach((m, index) => {
+    // 每个链接间隔约 1 秒（800~1200ms 随机延时），避免同时打开大量链接导致卡顿
+    let cumulativeDelay = 0;
+    matchResults.forEach((m) => {
+      const randomDelay = 800 + Math.floor(Math.random() * 400); // 800~1200ms
+      cumulativeDelay += randomDelay;
       setTimeout(() => {
         if (config.autoOpenTab) {
-          // 自动打开链接（同时处理收藏夹）
           console.log(`[Auto Refresh & Click] 新标签页打开: "${m.text}" -> ${m.href}`);
           chrome.runtime.sendMessage({
             action: 'openTab',
@@ -142,7 +145,6 @@
             addToBookmarks: config.addToBookmarks,
           });
         } else if (config.addToBookmarks) {
-          // 不打开链接，仅加入收藏夹
           console.log(`[Auto Refresh & Click] 仅收藏: "${m.text}" -> ${m.href}`);
           chrome.runtime.sendMessage({
             action: 'addBookmarkOnly',
@@ -151,7 +153,7 @@
             text: m.text,
           });
         }
-      }, index * 300);
+      }, cumulativeDelay);
     });
   }
 
@@ -165,45 +167,6 @@
       sendResponse({ status: 'scanned' });
     }
     return true;
-  });
-
-  /**
-   * 停止监控的辅助函数
-   */
-  function stopMonitoring() {
-    try {
-      chrome.storage.local.get({ isRunning: false }, (config) => {
-        if (chrome.runtime.lastError) return;
-        if (config.isRunning) {
-          chrome.storage.local.set({ isRunning: false });
-          chrome.runtime.sendMessage({ action: 'stop' });
-          console.log('[Auto Refresh & Click] 用户操作停止监控');
-        }
-      });
-    } catch (e) {
-      // 扩展上下文已失效，忽略
-    }
-  }
-
-  /**
-   * 点击页面空白处停止监控
-   */
-  document.addEventListener('click', (e) => {
-    // 只在点击非链接、非按钮、非输入框等空白区域时停止
-    const tag = e.target.tagName.toLowerCase();
-    const interactive = ['a', 'button', 'input', 'select', 'textarea', 'label', 'video', 'audio'];
-    if (!interactive.includes(tag) && !e.target.closest('a, button, input, select, textarea, label')) {
-      stopMonitoring();
-    }
-  });
-
-  /**
-   * 按下 ESC 键停止监控
-   */
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      stopMonitoring();
-    }
   });
 
   // 页面加载完成后，检查是否需要立即扫描
