@@ -47,6 +47,9 @@ async function startMonitoring() {
     scheduleShortInterval(intervalMs);
     console.log(`[Background] 短间隔定时器已启动，间隔: ${intervalMs} 毫秒`);
   }
+
+  // 立即执行第一次刷新扫描
+  await refreshAndScan();
 }
 
 /**
@@ -276,6 +279,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
             sendResponse({ status: 'opened' });
           }
+          break;
+
+        case 'addBookmarkOnly':
+          // 仅添加到收藏夹，不打开链接
+          console.log(`[Background] addBookmarkOnly: url=${message.url}, keyword=${message.keyword}`);
+          if (message.keyword) {
+            try {
+              await addToBookmarks(message.keyword, message.url, message.text || message.url);
+            } catch (e) {
+              console.error('[Background] 添加收藏夹失败:', e);
+            }
+          }
+          // 记录到已访问列表，防止重复处理
+          await addVisitedUrl(message.url);
+          sendResponse({ status: 'bookmarked' });
           break;
 
         case 'clearCache':

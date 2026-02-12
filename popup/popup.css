@@ -128,6 +128,18 @@ h1 {
   border: 1px solid var(--border-color);
 }
 
+.status-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.btn-compact {
+  padding: 5px 12px;
+  font-size: 12px;
+  flex: none;
+}
+
 .status-dot {
   width: 10px;
   height: 10px;
@@ -326,14 +338,7 @@ textarea::placeholder {
 }
 
 /* ===== 按钮 ===== */
-.actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 4px;
-}
-
 .btn {
-  flex: 1;
   padding: 10px 16px;
   border: none;
   border-radius: 8px;

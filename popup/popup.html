@@ -15,10 +15,14 @@
       </a>
     </div>
 
-    <!-- 状态区域 -->
+    <!-- 状态区域 + 操作按钮 -->
     <div class="status-bar" id="statusBar">
       <span class="status-dot" id="statusDot"></span>
       <span id="statusText">已停止</span>
+      <div class="status-actions">
+        <button id="startBtn" class="btn btn-primary btn-compact">▶ 开始</button>
+        <button id="stopBtn" class="btn btn-danger btn-compact" disabled>⏹ 停止</button>
+      </div>
     </div>
 
     <!-- 刷新间隔设置 -->
@@ -62,11 +66,16 @@
       </div>
     </div>
 
-    <!-- 收藏夹选项 -->
+    <!-- 匹配后操作 -->
     <div class="section">
+      <label class="section-title">📌 匹配后操作</label>
+      <label class="checkbox-label bookmark-option">
+        <input type="checkbox" id="autoOpenTab" checked>
+        <span>🔗 链接文字匹配后自动打开该链接网址</span>
+      </label>
       <label class="checkbox-label bookmark-option">
         <input type="checkbox" id="addToBookmarks">
-        <span>📑 点击后加入收藏夹</span>
+        <span>📑 链接文字匹配后加入收藏夹</span>
       </label>
       <div class="hint">收藏夹文件夹名为匹配到的关键词</div>
     </div>
@@ -105,12 +114,6 @@
       </div>
       <div class="hint">已打开过的链接不会重复打开，清除缓存后可重新触发</div>
       <button id="clearCacheBtn" class="btn btn-small btn-warning">🗑 清除缓存</button>
-    </div>
-
-    <!-- 操作按钮 -->
-    <div class="actions">
-      <button id="startBtn" class="btn btn-primary">▶ 开始监控</button>
-      <button id="stopBtn" class="btn btn-danger" disabled>⏹ 停止监控</button>
     </div>
   </div>
 

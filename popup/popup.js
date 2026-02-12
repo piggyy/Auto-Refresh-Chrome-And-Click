@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     caseSensitive: document.getElementById('caseSensitive'),
     wholeWord: document.getElementById('wholeWord'),
     useRegex: document.getElementById('useRegex'),
+    autoOpenTab: document.getElementById('autoOpenTab'),
     addToBookmarks: document.getElementById('addToBookmarks'),
     startBtn: document.getElementById('startBtn'),
     stopBtn: document.getElementById('stopBtn'),
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     caseSensitive: false,
     wholeWord: false,
     useRegex: false,
+    autoOpenTab: true,
     addToBookmarks: false,
     clickBehavior: 'first',
     isRunning: false,
@@ -45,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.caseSensitive.checked = config.caseSensitive;
   elements.wholeWord.checked = config.wholeWord;
   elements.useRegex.checked = config.useRegex;
+  elements.autoOpenTab.checked = config.autoOpenTab;
   elements.addToBookmarks.checked = config.addToBookmarks;
 
   // 设置点击行为
@@ -115,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.intervalValue, elements.intervalUnit,
     elements.keywords, elements.caseSensitive,
     elements.wholeWord, elements.useRegex,
-    elements.addToBookmarks,
+    elements.autoOpenTab, elements.addToBookmarks,
   ];
 
   autoSaveElements.forEach(el => {
@@ -154,6 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       caseSensitive: elements.caseSensitive.checked,
       wholeWord: elements.wholeWord.checked,
       useRegex: elements.useRegex.checked,
+      autoOpenTab: elements.autoOpenTab.checked,
       addToBookmarks: elements.addToBookmarks.checked,
       clickBehavior: selectedBehavior ? selectedBehavior.value : 'first',
     });

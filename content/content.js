@@ -128,17 +128,29 @@
       addToBookmarks: config.addToBookmarks,
     });
 
-    // 在新标签页中打开链接，不在当前页面跳转，避免反复点击
+    // 根据配置决定打开链接和/或加入收藏夹
     matchResults.forEach((m, index) => {
       setTimeout(() => {
-        console.log(`[Auto Refresh & Click] 新标签页打开: "${m.text}" -> ${m.href}`);
-        chrome.runtime.sendMessage({
-          action: 'openTab',
-          url: m.href,
-          keyword: m.keyword,
-          text: m.text,
-          addToBookmarks: config.addToBookmarks,
-        });
+        if (config.autoOpenTab) {
+          // 自动打开链接（同时处理收藏夹）
+          console.log(`[Auto Refresh & Click] 新标签页打开: "${m.text}" -> ${m.href}`);
+          chrome.runtime.sendMessage({
+            action: 'openTab',
+            url: m.href,
+            keyword: m.keyword,
+            text: m.text,
+            addToBookmarks: config.addToBookmarks,
+          });
+        } else if (config.addToBookmarks) {
+          // 不打开链接，仅加入收藏夹
+          console.log(`[Auto Refresh & Click] 仅收藏: "${m.text}" -> ${m.href}`);
+          chrome.runtime.sendMessage({
+            action: 'addBookmarkOnly',
+            url: m.href,
+            keyword: m.keyword,
+            text: m.text,
+          });
+        }
       }, index * 300);
     });
   }
@@ -202,6 +214,7 @@
       caseSensitive: false,
       wholeWord: false,
       useRegex: false,
+      autoOpenTab: true,
       addToBookmarks: false,
       clickBehavior: 'first',
     }, (config) => {
