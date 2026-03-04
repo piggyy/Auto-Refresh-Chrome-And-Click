@@ -1,15 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Auto Refresh & Click",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "自动刷新页面并监控链接文字，发现感兴趣的文字自动点击链接，支持通配符、正则表达式、大小写和全字匹配",
   "permissions": [
     "storage",
     "bookmarks",
     "tabs",
-    "alarms",
-    "activeTab",
-    "scripting"
+    "alarms"
   ],
   "action": {
     "default_popup": "popup/popup.html",
